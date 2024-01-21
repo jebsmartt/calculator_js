@@ -1,3 +1,7 @@
+body {
+    font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
 .keypadButton {
     background-color: orange;
     flex-basis: calc(33.33% - 10px); /* Set the max width for each item, considering spacing */
