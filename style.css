@@ -1,0 +1,8 @@
+.keypadButton {
+    background-color: orange;
+    flex-basis: calc(33.33% - 10px); /* Set the max width for each item, considering spacing */
+}
+
+.operatorButton {
+    flex-basis: calc(100% - 10px); /* Set the max width for each item, considering spacing */
+}
