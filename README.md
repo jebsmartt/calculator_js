@@ -1,6 +1,6 @@
 # calculator_js
 
-Goals
+Objectives
 
 Don’t forget to commit early & often! You can reference the Commit Message lesson here!
 
@@ -37,4 +37,4 @@ Extra credit
     Add keyboard support! You might run into an issue where keys such as (/) might cause you some trouble. Read the MDN documentation for event.preventDefault to help solve this problem.
 
 
-TESTING GIT BRANCHING
+TESTING TO SEE HOW GIT BRANCHING WORKS
