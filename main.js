@@ -19,14 +19,14 @@ screenDiv.textContent = 0
 
 // Handle the memory of the calculator
 let calcMemory = {
-    screenStatus: 'firstValue',
+    screenStatus: 'firstValue',   // firstValue, secondValue, or calculatedValue
     firstValue: 0,
     secondValue: null,
     pendingOperation: null,
     calculatedValue: null,
     lastOperation: null,
     equalsFlag: false,
-    memoryLog: function () {
+    memoryLog: function (action) {
         // Get the keys of the object
         const keys = Object.keys(calcMemory).filter(key => (
             key !== 'memoryLog' && key !== 'lastOperation')
@@ -38,7 +38,7 @@ let calcMemory = {
         // Join the key-value pairs with commas
         const resultString = keyValuePairs.join(' | ');
 
-        console.log(resultString);
+        console.log('Action: ' + String(action) + '\n' + resultString);
     }
 }
 
@@ -75,7 +75,7 @@ clearButton.addEventListener('click', function() {
         calculatedValue: null,
         lastOperation: null,
         equalsFlag: false,
-        screenStatus: 'firstValue'   // firstValue, secondValue, or calculatedValue
+        screenStatus: 'firstValue'   
     }
 })
 
@@ -116,13 +116,13 @@ const multiplyButton = operatorDiv.appendChild(insertButton('×', 'operatorButto
 const additionButton = operatorDiv.appendChild(insertButton('+', 'operatorButton'))
 additionButton.addEventListener('click', function () {
     calcMemory.pendingOperation = 'add'
-    calcMemory.memoryLog()
+    calcMemory.memoryLog('Pressed +')
 
 })
 const subtractButton = operatorDiv.appendChild(insertButton('-', 'operatorButton'))
 subtractButton.addEventListener('click', function () {
     calcMemory.pendingOperation = 'subtract'
-    calcMemory.memoryLog()
+    calcMemory.memoryLog('Pressed -')
 
 })
 
@@ -146,6 +146,8 @@ function calculate (operation) {
             return;
         }
     calcMemory.calculatedValue = calcMemory.lastOperation()
+    calcMemory.screenStatus = 'calculatedValue'
+    screenDiv.textContent = calcMemory.calculatedValue
 }
 equalsButton.addEventListener('click', function () {
     // Checks if equals is toggled on
@@ -159,9 +161,7 @@ equalsButton.addEventListener('click', function () {
     // Prepare for the case of the user doing another operation
     calcMemory.equalsFlag = true
     calcMemory.pendingOperation = null
-    calcMemory.screenStatus = 'calculatedValue'
-    screenDiv.textContent = calcMemory.calculatedValue
-    calcMemory.memoryLog()
+    calcMemory.memoryLog('Pressed =')
     calcMemory.firstValue = calcMemory.calculatedValue
     calcMemory.calculatedValue = null
 })
@@ -204,14 +204,22 @@ function insertButton (symbol, assignedClass) {
             }
 
             // See the log
-            calcMemory.memoryLog()
+            calcMemory.memoryLog(`Pressed ${symbol}`)
         })
     } else if (assignedClass == 'operatorButton' && symbol !== '=') {
         calButton.addEventListener('click', function () {
+            if (calcMemory.pendingOperation !== null && calcMemory.equalsFlag === false) {
+                calcMemory.secondValue = screenDiv.textContent
+                calculate(calcMemory.pendingOperation)
+                calcMemory.memoryLog('Chained Auto Calc')
+                calcMemory.firstValue = calcMemory.calculatedValue
+                calcMemory.calculatedValue = null
+
+            }
+            
             calcMemory.equalsFlag = false  // Toggles off the flag when user clicks number
             calcMemory.firstValue = screenDiv.textContent
             calcMemory.secondValue = null
-      
         })
     }
     return calButton
