@@ -18,7 +18,7 @@ screenDiv.style.paddingRight = '10px'
 screenDiv.textContent = 0
 
 // Handle the memory of the calculator
-let calcMemory = {
+const calcMemoryTemplate = {
     screenStatus: 'firstValue',   // firstValue, secondValue, or calculatedValue
     firstValue: 0,
     secondValue: null,
@@ -41,6 +41,8 @@ let calcMemory = {
         console.log('Action: ' + String(action) + '\n' + resultString);
     }
 }
+
+let calcMemory = { ...calcMemoryTemplate }
 
 // Div for all of the buttons
 const controlDiv = document.createElement('div')
@@ -68,15 +70,8 @@ modifierDiv.style.paddingBottom = '10px'
 const clearButton = modifierDiv.appendChild(insertButton('AC', 'modifierButton'))
 clearButton.addEventListener('click', function() {
     screenDiv.textContent = 0
-    calcMemory = {
-        firstValue: 0,
-        secondValue: null,
-        pendingOperation: null,
-        calculatedValue: null,
-        lastOperation: null,
-        equalsFlag: false,
-        screenStatus: 'firstValue'   
-    }
+    calcMemory = { ...calcMemoryTemplate }
+    calcMemory.memoryLog('Pressed AC')
 })
 
 // This is the div that contains the number buttons
