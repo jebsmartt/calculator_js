@@ -22,10 +22,10 @@ const calcMemoryTemplate = {
     screenStatus: 'firstValue',   // firstValue, secondValue, or calculatedValue
     firstValue: 0,
     secondValue: null,
-    pendingOperation: null,
-    calculatedValue: null,
-    lastOperation: null,
-    equalsFlag: false,
+    pendingOperation: null,     // add, subtract, multiply, divide
+    calculatedValue: null,      // the result of the operation
+    lastOperation: null,        // stored function that when used will do the pendingOperation
+    equalsFlag: false,          // used to indicate if equals button was pressed
     memoryLog: function (action) {
         // Get the keys of the object
         const keys = Object.keys(calcMemory).filter(key => (
