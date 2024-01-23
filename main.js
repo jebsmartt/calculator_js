@@ -4,7 +4,7 @@ const calculatorDiv = document.createElement('div')
 calculatorDiv.id = 'calculator'
 calculatorDiv.style.backgroundColor = 'black'
 calculatorDiv.style.display = 'flex'
-calculatorDiv.style.maxWidth = '600px'
+calculatorDiv.style.maxWidth = '900px'
 calculatorDiv.style.flexDirection = 'column'
 calculatorDiv.style.alignItems = 'stretch'
 
@@ -19,19 +19,33 @@ screenDiv.textContent = 0
 
 // Handle the memory of the calculator
 let calcMemory = {
+    screenStatus: 'firstValue',
     firstValue: 0,
     secondValue: null,
     pendingOperation: null,
     calculatedValue: null,
     lastOperation: null,
     equalsFlag: false,
-    screenStatus: 'firstValue'
+    memoryLog: function () {
+        // Get the keys of the object
+        const keys = Object.keys(calcMemory).filter(key => (
+            key !== 'memoryLog' && key !== 'lastOperation')
+            );
+
+        // Map each key to a string in the format "key: value"
+        const keyValuePairs = keys.map(key => `${key}: ${calcMemory[key]}`);
+
+        // Join the key-value pairs with commas
+        const resultString = keyValuePairs.join(' | ');
+
+        console.log(resultString);
+    }
 }
 
 // Div for all of the buttons
 const controlDiv = document.createElement('div')
 controlDiv.id = 'controls'
-controlDiv.style.backgroundColor = 'green'
+controlDiv.style.backgroundColor = 'black'
 controlDiv.style.paddingTop = '10px'
 controlDiv.style.paddingBottom = '10px'
 controlDiv.style.display = 'flex'
@@ -41,15 +55,17 @@ const leftDiv = document.createElement('div')
 leftDiv.id = 'leftDiv'
 leftDiv.style.display = 'flex'
 leftDiv.style.flexDirection = 'column'
+leftDiv.style.flexGrow = 3
 
 // For now its just the clear button
 const modifierDiv = document.createElement('div')
 modifierDiv.id = 'modifierDiv'
+modifierDiv.style.padding = '10px'
 modifierDiv.style.display = 'flex'
 modifierDiv.style.paddingBottom = '10px'
 
 // Add modifier buttons
-const clearButton = modifierDiv.appendChild(addButton('AC', 'modifierButton'))
+const clearButton = modifierDiv.appendChild(insertButton('AC', 'modifierButton'))
 clearButton.addEventListener('click', function() {
     screenDiv.textContent = 0
     calcMemory = {
@@ -59,103 +75,99 @@ clearButton.addEventListener('click', function() {
         calculatedValue: null,
         lastOperation: null,
         equalsFlag: false,
-        screenStatus: 'firstValue'
+        screenStatus: 'firstValue'   // firstValue, secondValue, or calculatedValue
     }
 })
 
-// These are the number buttons
+// This is the div that contains the number buttons
 const keypadDiv = document.createElement('div')
 keypadDiv.id = 'keypad'
-keypadDiv.style.backgroundColor = 'purple'
+keypadDiv.style.backgroundColor = 'black'
+keypadDiv.style.margin = '10px'
 keypadDiv.style.display = 'flex'
 keypadDiv.style.flexWrap = 'wrap'
-keypadDiv.style.flexGrow = 3
 keypadDiv.style.gap = '10px'
 
 // Add the digits to the keypad
-const sevenButton = keypadDiv.appendChild(addButton(7, 'keypadButton'))
-const eightButton = keypadDiv.appendChild(addButton(8, 'keypadButton'))
-const nineButton = keypadDiv.appendChild(addButton(9, 'keypadButton'))
-const fourButton = keypadDiv.appendChild(addButton(4, 'keypadButton'))
-const fiveButton = keypadDiv.appendChild(addButton(5, 'keypadButton'))
-const sixButton = keypadDiv.appendChild(addButton(6, 'keypadButton'))
-const oneButton = keypadDiv.appendChild(addButton(1, 'keypadButton'))
-const twoButton = keypadDiv.appendChild(addButton(2, 'keypadButton'))
-const threeButton = keypadDiv.appendChild(addButton(3, 'keypadButton'))
-const zeroButton = keypadDiv.appendChild(addButton(0, 'keypadButton'))
+const sevenButton = keypadDiv.appendChild(insertButton(7, 'keypadButton'))
+const eightButton = keypadDiv.appendChild(insertButton(8, 'keypadButton'))
+const nineButton = keypadDiv.appendChild(insertButton(9, 'keypadButton'))
+const fourButton = keypadDiv.appendChild(insertButton(4, 'keypadButton'))
+const fiveButton = keypadDiv.appendChild(insertButton(5, 'keypadButton'))
+const sixButton = keypadDiv.appendChild(insertButton(6, 'keypadButton'))
+const oneButton = keypadDiv.appendChild(insertButton(1, 'keypadButton'))
+const twoButton = keypadDiv.appendChild(insertButton(2, 'keypadButton'))
+const threeButton = keypadDiv.appendChild(insertButton(3, 'keypadButton'))
+const zeroButton = keypadDiv.appendChild(insertButton(0, 'keypadButton'))
 
 // These are the operator buttons e.g. multiply, add, etc.
 const operatorDiv = document.createElement('div')
 operatorDiv.id = 'operators'
 operatorDiv.style.backgroundColor = 'black'
+operatorDiv.style.padding = '10px'
 operatorDiv.style.display = 'flex'
 operatorDiv.style.flexDirection = 'column'
 operatorDiv.style.flexGrow = 1
 operatorDiv.style.gap = '10px'
 
 // Add the operators to the operator section
-const divideButton = operatorDiv.appendChild(addButton('÷', 'operatorButton'))
-const multiplyButton = operatorDiv.appendChild(addButton('×', 'operatorButton'))
-const additionButton = operatorDiv.appendChild(addButton('+', 'operatorButton'))
+const divideButton = operatorDiv.appendChild(insertButton('÷', 'operatorButton'))
+const multiplyButton = operatorDiv.appendChild(insertButton('×', 'operatorButton'))
+const additionButton = operatorDiv.appendChild(insertButton('+', 'operatorButton'))
 additionButton.addEventListener('click', function () {
-    calcMemory.equalsFlag = false
     calcMemory.pendingOperation = 'add'
-    calcMemory.firstValue = screenDiv.textContent
-    calcMemory.secondValue = null
-    
-    // DELETE AFTER TEST
-    console.log(`${calcMemory.screenStatus} - ${calcMemory.pendingOperation}`)
-})
-const subtractButton = operatorDiv.appendChild(addButton('-', 'operatorButton'))
-subtractButton.addEventListener('click', function () {
-    calcMemory.equalsFlag = false
-    calcMemory.pendingOperation = 'subtract'
-    calcMemory.firstValue = screenDiv.textContent
-    calcMemory.secondValue = null
+    calcMemory.memoryLog()
 
-    // DELETE AFTER TEST
-    console.log(`${calcMemory.screenStatus} - ${calcMemory.pendingOperation}`)
 })
-const equalsButton = operatorDiv.appendChild(addButton('=', 'operatorButton'))
+const subtractButton = operatorDiv.appendChild(insertButton('-', 'operatorButton'))
+subtractButton.addEventListener('click', function () {
+    calcMemory.pendingOperation = 'subtract'
+    calcMemory.memoryLog()
+
+})
+
+// Logic for OPERATOR buttons
+const equalsButton = operatorDiv.appendChild(insertButton('=', 'operatorButton'))
+equalsButton.id = "equalsButton"
+function calculate (operation) {
+    switch (operation) {
+        case 'add':
+            calcMemory.lastOperation = function add() {
+                return Number(calcMemory.firstValue) + Number(calcMemory.secondValue) 
+            }
+            break;
+        case 'subtract':
+            calcMemory.lastOperation = function subtract() {
+                return Number(calcMemory.firstValue) - Number(calcMemory.secondValue) 
+            }
+            break;
+        default:
+            screenDiv.textContent = 'Error'
+            return;
+        }
+    calcMemory.calculatedValue = calcMemory.lastOperation()
+}
 equalsButton.addEventListener('click', function () {
-    // Checks if we have stored a value already
+    // Checks if equals is toggled on
     if (calcMemory.equalsFlag === true) {
         calcMemory.calculatedValue = calcMemory.lastOperation()
     } else { 
         calcMemory.secondValue = screenDiv.textContent
         // Checks what operation we are doing, executes the operation and updates the screen
-        // TODO: replace Number with parseFloat
-        switch (calcMemory.pendingOperation) {
-            case 'add':
-                calcMemory.lastOperation = function add() {
-                    return Number(calcMemory.firstValue) + Number(calcMemory.secondValue) 
-                }
-                calcMemory.calculatedValue = calcMemory.lastOperation()
-                break;
-            case 'subtract':
-                calcMemory.lastOperation = function subtract() {
-                    return Number(calcMemory.firstValue) - Number(calcMemory.secondValue) 
-                }
-                calcMemory.calculatedValue = calcMemory.lastOperation()
-                break;
-            default:
-                screenDiv.textContent = 'Error'
-        }
+        calculate(calcMemory.pendingOperation)
     }
     // Prepare for the case of the user doing another operation
     calcMemory.equalsFlag = true
-    screenDiv.textContent = calcMemory.calculatedValue
-    calcMemory.screenStatus = 'calculatedValue'
-    calcMemory.firstValue = calcMemory.calculatedValue
     calcMemory.pendingOperation = null
+    calcMemory.screenStatus = 'calculatedValue'
+    screenDiv.textContent = calcMemory.calculatedValue
+    calcMemory.memoryLog()
+    calcMemory.firstValue = calcMemory.calculatedValue
     calcMemory.calculatedValue = null
-
-    // DELETE AFTER TEST
-    console.log(`${calcMemory.screenStatus} - ${calcMemory.pendingOperation}`)
 })
 
-// A function to add buttons
-function addButton (symbol, assignedClass) {
+// A function to insert buttons
+function insertButton (symbol, assignedClass) {
     const calButton = document.createElement('button')
     calButton.classList.add(assignedClass)
     calButton.textContent = symbol
@@ -191,8 +203,15 @@ function addButton (symbol, assignedClass) {
                 }
             }
 
-            // DELETE AFTER TEST
-            console.log(`${calcMemory.screenStatus} - ${calcMemory.pendingOperation}`)
+            // See the log
+            calcMemory.memoryLog()
+        })
+    } else if (assignedClass == 'operatorButton' && symbol !== '=') {
+        calButton.addEventListener('click', function () {
+            calcMemory.equalsFlag = false  // Toggles off the flag when user clicks number
+            calcMemory.firstValue = screenDiv.textContent
+            calcMemory.secondValue = null
+      
         })
     }
     return calButton
