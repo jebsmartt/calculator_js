@@ -143,6 +143,7 @@ additionButton.addEventListener('click', function () {
 // Logic for OPERATOR buttons
 const equalsButton = operatorDiv.appendChild(insertButton('=', 'operatorButton'))
 equalsButton.id = "equalsButton"
+
 function calculate (operation) {
     switch (operation) {
         case 'add':
@@ -170,10 +171,22 @@ function calculate (operation) {
         }
     calcMemory.calculatedValue = calcMemory.lastOperation()
     calcMemory.screenStatus = 'calculatedValue'
-    screenDiv.textContent = calcMemory.calculatedValue.toLocaleString(undefined, {
-        minimumFractionDigits: 0,
-        maximumFractionDigits: 8,
-    })
+
+    screenDiv.textContent = displayValue(calcMemory.calculatedValue)
+}
+
+function displayValue (value) {
+    const valueString = String(value)
+    if (valueString.length > 16) {
+        console.log(Number(value).toExponential(2))
+        return String(Number(value).toExponential(2))
+    } else {
+        let formattedString = value.toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 8,
+        })
+        return formattedString
+    }
 }
 
 // Adds event listener to the equals button
@@ -185,7 +198,7 @@ equalsButton.addEventListener('click', function () {
         } catch (err) {
             calcMemory.calculatedValue = calcMemory.secondValue
         }
-        screenDiv.textContent = calcMemory.calculatedValue
+        screenDiv.textContent = displayValue(calcMemory.calculatedValue)
     } else { 
         calcMemory.secondValue = Number(screenDiv.textContent)
         // Checks what operation we are doing, executes the operation and updates the screen
@@ -225,9 +238,7 @@ function insertButton (symbol, assignedClass) {
                     if (Number(symbol)) {       // True if not the decimal
                         const digitsArray = oldNumber.split('')
                         digitsArray.push(String(symbol))
-                        console.log(digitsArray)
                         const concatString = digitsArray.join('')
-                        console.log(concatString)
                         // const newNumber = parseFloat(concatString)
                         screenDiv.textContent = concatString
                     } else {
@@ -237,9 +248,7 @@ function insertButton (symbol, assignedClass) {
                             // add a decimal
                             const digitsArray = oldNumber.split('')
                             digitsArray.push(String(symbol))
-                            console.log(digitsArray)
                             const concatString = digitsArray.join('')
-                            console.log(concatString)
                             // const newNumber = parseFloat(concatString)
                             screenDiv.textContent = concatString
                         }
@@ -277,7 +286,7 @@ function insertButton (symbol, assignedClass) {
             }
             
             calcMemory.equalsFlag = false  // Toggles off the flag when user clicks number
-            calcMemory.firstValue = Number(screenDiv.textContent)
+            calcMemory.firstValue = Number(screenDiv.textContent.replace(/,/g, '')) // Number can't handle commas
             calcMemory.secondValue = null
         })
     }
