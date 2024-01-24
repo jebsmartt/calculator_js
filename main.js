@@ -83,7 +83,7 @@ keypadDiv.style.display = 'flex'
 keypadDiv.style.flexWrap = 'wrap'
 keypadDiv.style.gap = '10px'
 
-// Add the digits to the keypad
+// Add the digits to the keypad and add the click event listener
 const sevenButton = keypadDiv.appendChild(insertButton(7, 'keypadButton'))
 const eightButton = keypadDiv.appendChild(insertButton(8, 'keypadButton'))
 const nineButton = keypadDiv.appendChild(insertButton(9, 'keypadButton'))
@@ -94,6 +94,7 @@ const oneButton = keypadDiv.appendChild(insertButton(1, 'keypadButton'))
 const twoButton = keypadDiv.appendChild(insertButton(2, 'keypadButton'))
 const threeButton = keypadDiv.appendChild(insertButton(3, 'keypadButton'))
 const zeroButton = keypadDiv.appendChild(insertButton(0, 'keypadButton'))
+const decimalButton = keypadDiv.appendChild(insertButton('.', 'keypadButton'))
 
 // These are the operator buttons e.g. multiply, add, etc.
 const operatorDiv = document.createElement('div')
@@ -157,7 +158,6 @@ function calculate (operation) {
             }
             break;
         default:
-            screenDiv.textContent = 'Error'
             return;
         }
     calcMemory.calculatedValue = calcMemory.lastOperation()
@@ -167,10 +167,17 @@ function calculate (operation) {
         maximumFractionDigits: 8,
     })
 }
+
+// Adds event listener to the equals button
 equalsButton.addEventListener('click', function () {
     // Checks if equals is toggled on
     if (calcMemory.equalsFlag === true) {
-        calcMemory.calculatedValue = calcMemory.lastOperation()
+        try {
+            calcMemory.calculatedValue = calcMemory.lastOperation()
+        } catch (err) {
+            calcMemory.calculatedValue = calcMemory.secondValue
+        }
+        screenDiv.textContent = calcMemory.calculatedValue
     } else { 
         calcMemory.secondValue = Number(screenDiv.textContent)
         // Checks what operation we are doing, executes the operation and updates the screen
@@ -189,36 +196,62 @@ function insertButton (symbol, assignedClass) {
     const calButton = document.createElement('button')
     calButton.classList.add(assignedClass)
     calButton.textContent = symbol
-
+    
+    // Add click event listener to keypad buttons (0-9)
     if (assignedClass == 'keypadButton') {
         calButton.addEventListener('click', function () {
-            const oldNumber = Number(screenDiv.textContent)
+            const oldNumber = screenDiv.textContent    // The number currently shown on the screen
             
             // Handles the translation of keypad clicks to the number displayed
             if (calcMemory.equalsFlag === true) {
-                screenDiv.textContent = Number(symbol)
+                calcMemory = { ...calcMemoryTemplate }
+                if (Number(symbol)) {       // True if not the decimal
+                    screenDiv.textContent = Number(symbol)
+                } else {        // Aka the button pushed was the decimal
+                    screenDiv.textContent = '0.'
+                }
                 calcMemory.equalsFlag = false
                 calcMemory.screenStatus = 'firstValue'
             } else if (calcMemory.pendingOperation === null) {
-                if (Number(oldNumber) !== 0) {
-                    const digitsArray = oldNumber.toString().split('').map(Number)
-                    digitsArray.push(symbol)
-                    const concatString = digitsArray.join('')
-                    const newNumber = parseInt(concatString, 10)
-                    screenDiv.textContent = newNumber
-                } else if (Number(oldNumber) === 0) {
-                    screenDiv.textContent = Number(symbol)
+                if (oldNumber !== '0') {
+                    if (Number(symbol)) {       // True if not the decimal
+                        const digitsArray = oldNumber.split('')
+                        digitsArray.push(String(symbol))
+                        console.log(digitsArray)
+                        const concatString = digitsArray.join('')
+                        console.log(concatString)
+                        // const newNumber = parseFloat(concatString)
+                        screenDiv.textContent = concatString
+                    } else {
+                        if (oldNumber.includes(".")) {
+                            // don't add a decimal because already float
+                        } else {
+                            // add a decimal
+                            const digitsArray = oldNumber.split('')
+                            digitsArray.push(String(symbol))
+                            console.log(digitsArray)
+                            const concatString = digitsArray.join('')
+                            console.log(concatString)
+                            // const newNumber = parseFloat(concatString)
+                            screenDiv.textContent = concatString
+                        }
+                    }
+                } else if (oldNumber === '0') {
+                    if (Number(symbol)) {
+                        screenDiv.textContent = Number(symbol)
+                    } else {    // Aka the button pushed was the decimal
+                        screenDiv.textContent = '0.'
+                    }
                 }
             } else if (calcMemory.pendingOperation !== null) {
                 if (calcMemory.screenStatus == 'firstValue' || calcMemory.screenStatus == 'calculatedValue' ) {
-                    screenDiv.textContent = Number(symbol)
+                    screenDiv.textContent = symbol
                     calcMemory.screenStatus = 'secondValue'
                 } else if (calcMemory.screenStatus == 'secondValue') {
-                    const digitsArray = oldNumber.toString().split('').map(Number)
+                    const digitsArray = oldNumber.toString().split('')
                     digitsArray.push(symbol)
                     const concatString = digitsArray.join('')
-                    const newNumber = parseInt(concatString, 10)
-                    screenDiv.textContent = newNumber
+                    screenDiv.textContent = concatString
                 }
             }
 
