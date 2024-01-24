@@ -245,7 +245,7 @@ function insertButton (symbol, assignedClass) {
                 }
             } else if (calcMemory.pendingOperation !== null) {
                 if (calcMemory.screenStatus == 'firstValue' || calcMemory.screenStatus == 'calculatedValue' ) {
-                    screenDiv.textContent = symbol
+                    screenDiv.textContent = (symbol !== '.') ? symbol : '0.'
                     calcMemory.screenStatus = 'secondValue'
                 } else if (calcMemory.screenStatus == 'secondValue') {
                     const digitsArray = oldNumber.toString().split('')
@@ -254,7 +254,6 @@ function insertButton (symbol, assignedClass) {
                     screenDiv.textContent = concatString
                 }
             }
-
             // See the log
             calcMemory.memoryLog(`Pressed ${symbol}`)
         })
