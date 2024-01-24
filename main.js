@@ -2,9 +2,11 @@
 // Over all div for calculator
 const calculatorDiv = document.createElement('div')
 calculatorDiv.id = 'calculator'
-calculatorDiv.style.backgroundColor = 'black'
+calculatorDiv.style.backgroundColor = 'white'
+calculatorDiv.style.padding = '10px'
+calculatorDiv.style.borderRadius = '15px'
 calculatorDiv.style.display = 'flex'
-calculatorDiv.style.maxWidth = '900px'
+calculatorDiv.style.maxWidth = '600px'
 calculatorDiv.style.flexDirection = 'column'
 calculatorDiv.style.alignItems = 'stretch'
 
@@ -13,8 +15,12 @@ const screenDiv = document.createElement('div')
 screenDiv.id = 'screen'
 screenDiv.style.textAlign = 'right'
 screenDiv.style.backgroundColor = '#e6d39e'
+screenDiv.style.borderStyle = 'solid'
+screenDiv.style.borderColor = 'black'
+screenDiv.style.borderWidth = '20px'
 screenDiv.style.paddingTop = '30px'
-screenDiv.style.paddingRight = '10px'
+screenDiv.style.paddingRight = '20px'
+screenDiv.style.paddingLeft = '20px'
 screenDiv.textContent = 0
 
 // Handle the memory of the calculator
@@ -50,6 +56,8 @@ controlDiv.id = 'controls'
 controlDiv.style.backgroundColor = 'black'
 controlDiv.style.paddingTop = '10px'
 controlDiv.style.paddingBottom = '10px'
+controlDiv.style.paddingLeft = '20px'
+controlDiv.style.paddingRight = '20px'
 controlDiv.style.display = 'flex'
 
 // Left side of calculator div
