@@ -107,17 +107,27 @@ operatorDiv.style.gap = '10px'
 
 // Add the operators to the operator section
 const divideButton = operatorDiv.appendChild(insertButton('÷', 'operatorButton'))
+divideButton.addEventListener('click', function () {
+    calcMemory.pendingOperation = 'divide'
+    calcMemory.memoryLog('Pressed ÷')
+
+})
 const multiplyButton = operatorDiv.appendChild(insertButton('×', 'operatorButton'))
-const additionButton = operatorDiv.appendChild(insertButton('+', 'operatorButton'))
-additionButton.addEventListener('click', function () {
-    calcMemory.pendingOperation = 'add'
-    calcMemory.memoryLog('Pressed +')
+multiplyButton.addEventListener('click', function () {
+    calcMemory.pendingOperation = 'multiply'
+    calcMemory.memoryLog('Pressed ×')
 
 })
 const subtractButton = operatorDiv.appendChild(insertButton('-', 'operatorButton'))
 subtractButton.addEventListener('click', function () {
     calcMemory.pendingOperation = 'subtract'
     calcMemory.memoryLog('Pressed -')
+
+})
+const additionButton = operatorDiv.appendChild(insertButton('+', 'operatorButton'))
+additionButton.addEventListener('click', function () {
+    calcMemory.pendingOperation = 'add'
+    calcMemory.memoryLog('Pressed +')
 
 })
 
@@ -136,20 +146,33 @@ function calculate (operation) {
                 return Number(calcMemory.firstValue) - Number(calcMemory.secondValue) 
             }
             break;
+        case 'multiply':
+            calcMemory.lastOperation = function multiply() {
+                return Number(calcMemory.firstValue) * Number(calcMemory.secondValue) 
+            }
+            break;
+        case 'divide':
+            calcMemory.lastOperation = function divide() {
+                return Number(calcMemory.firstValue) / Number(calcMemory.secondValue) 
+            }
+            break;
         default:
             screenDiv.textContent = 'Error'
             return;
         }
     calcMemory.calculatedValue = calcMemory.lastOperation()
     calcMemory.screenStatus = 'calculatedValue'
-    screenDiv.textContent = calcMemory.calculatedValue
+    screenDiv.textContent = calcMemory.calculatedValue.toLocaleString(undefined, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 8,
+    })
 }
 equalsButton.addEventListener('click', function () {
     // Checks if equals is toggled on
     if (calcMemory.equalsFlag === true) {
         calcMemory.calculatedValue = calcMemory.lastOperation()
     } else { 
-        calcMemory.secondValue = screenDiv.textContent
+        calcMemory.secondValue = Number(screenDiv.textContent)
         // Checks what operation we are doing, executes the operation and updates the screen
         calculate(calcMemory.pendingOperation)
     }
@@ -169,8 +192,9 @@ function insertButton (symbol, assignedClass) {
 
     if (assignedClass == 'keypadButton') {
         calButton.addEventListener('click', function () {
-            const oldNumber = screenDiv.textContent
+            const oldNumber = Number(screenDiv.textContent)
             
+            // Handles the translation of keypad clicks to the number displayed
             if (calcMemory.equalsFlag === true) {
                 screenDiv.textContent = Number(symbol)
                 calcMemory.equalsFlag = false
@@ -204,7 +228,7 @@ function insertButton (symbol, assignedClass) {
     } else if (assignedClass == 'operatorButton' && symbol !== '=') {
         calButton.addEventListener('click', function () {
             if (calcMemory.pendingOperation !== null && calcMemory.equalsFlag === false) {
-                calcMemory.secondValue = screenDiv.textContent
+                calcMemory.secondValue = Number(screenDiv.textContent)
                 calculate(calcMemory.pendingOperation)
                 calcMemory.memoryLog('Chained Auto Calc')
                 calcMemory.firstValue = calcMemory.calculatedValue
@@ -213,7 +237,7 @@ function insertButton (symbol, assignedClass) {
             }
             
             calcMemory.equalsFlag = false  // Toggles off the flag when user clicks number
-            calcMemory.firstValue = screenDiv.textContent
+            calcMemory.firstValue = Number(screenDiv.textContent)
             calcMemory.secondValue = null
         })
     }
