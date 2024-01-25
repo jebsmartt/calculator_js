@@ -177,7 +177,7 @@ function calculate (operation) {
 
 function displayValue (value) {
     const valueString = String(value)
-    if (valueString.length > 16) {
+    if (valueString.length > 20) {
         console.log(Number(value).toExponential(2))
         return String(Number(value).toExponential(2))
     } else {
