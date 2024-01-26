@@ -178,7 +178,6 @@ function calculate (operation) {
 function displayValue (value) {
     const valueString = String(value)
     if (valueString.length > 20) {
-        console.log(Number(value).toExponential(2))
         return String(Number(value).toExponential(2))
     } else {
         let formattedString = value.toLocaleString(undefined, {
@@ -222,6 +221,17 @@ function insertButton (symbol, assignedClass) {
     if (assignedClass == 'keypadButton') {
         calButton.addEventListener('click', function () {
             const oldNumber = screenDiv.textContent    // The number currently shown on the screen
+            function updateNumber () {
+                const digitsArray = oldNumber.split('')  // An array
+                if (digitsArray.length < 16) {
+                    digitsArray.push(String(symbol))
+                    const concatString = digitsArray.join('') // A string
+                    screenDiv.textContent = concatString
+                } else {
+                    // do nothing because arbitrary digit length hit
+                    console.log('Warning: Max digit length hit')
+                }
+            }
             
             // Handles the translation of keypad clicks to the number displayed
             if (calcMemory.equalsFlag === true) {
@@ -236,21 +246,13 @@ function insertButton (symbol, assignedClass) {
             } else if (calcMemory.pendingOperation === null) {
                 if (oldNumber !== '0') {
                     if (Number(symbol)) {       // True if not the decimal
-                        const digitsArray = oldNumber.split('')
-                        digitsArray.push(String(symbol))
-                        const concatString = digitsArray.join('')
-                        // const newNumber = parseFloat(concatString)
-                        screenDiv.textContent = concatString
+                        updateNumber()
+                        
                     } else {
                         if (oldNumber.includes(".")) {
                             // don't add a decimal because already float
                         } else {
-                            // add a decimal
-                            const digitsArray = oldNumber.split('')
-                            digitsArray.push(String(symbol))
-                            const concatString = digitsArray.join('')
-                            // const newNumber = parseFloat(concatString)
-                            screenDiv.textContent = concatString
+                            updateNumber()
                         }
                     }
                 } else if (oldNumber === '0') {
@@ -265,10 +267,7 @@ function insertButton (symbol, assignedClass) {
                     screenDiv.textContent = (symbol !== '.') ? symbol : '0.'
                     calcMemory.screenStatus = 'secondValue'
                 } else if (calcMemory.screenStatus == 'secondValue') {
-                    const digitsArray = oldNumber.toString().split('')
-                    digitsArray.push(symbol)
-                    const concatString = digitsArray.join('')
-                    screenDiv.textContent = concatString
+                    updateNumber()
                 }
             }
             // See the log
