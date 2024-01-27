@@ -5,7 +5,7 @@ const calcMemoryTemplate = {
     firstValue: 0,
     secondValue: null,
     decimalFlag: false,
-    scientificNotationFlag: false,
+    maxDigitFlag: false,
     pendingOperation: null,     // add, subtract, multiply, divide
     calculatedValue: null,      // the result of the operation
     lastOperation: null,        // stored function that when used will do the pendingOperation
@@ -39,10 +39,27 @@ function getCalcMemoryItem (key) {
 
 let screen = document.getElementById('screen')
 
-function updateScreen(value) {
-    screen.textContent = value
-}
+function formatValue(value) {
+    // Convert the string to an array of characters
+    const characters = value.split('');
+    const charactersNoCommas = characters.filter(value => value !== ',')
+    console.log(charactersNoCommas)
+    let startingIndex = charactersNoCommas.length - 3
+    
+    if (characters.indexOf('.') > -1) {
+        startingIndex = characters.indexOf('.') - 4
+    } 
 
+    // Iterate over the characters in reverse order
+    for (let i = startingIndex; i > 0; i -= 3) {
+        // Insert a comma after every group of three digits
+        charactersNoCommas.splice(i, 0, ',');
+    }
+    
+    // Join the characters back into a string with commas
+    const formattedValue = charactersNoCommas.join('');
+    return formattedValue
+}
 
 
 // add event listeners to buttons
@@ -54,11 +71,23 @@ const childrenOfZeroAndDecimal = zeroAndDecimal.querySelectorAll('button')
 
 const keypad = [...childrenOfDigits, ...childrenOfZeroAndDecimal]
 
+// add click events for keypad
 keypad.forEach(child => {
     child.addEventListener('click', function () {
-        // Updates the screen when a digit (0, 1-9, or decimal) is pressed     
+        
+        // get the string from the screen
+        const inputString = screen.textContent
+        // create an array of digits found
+        const digitArray = inputString.match(/\d/g);
+        
+        // get id and value of the button pressed
         const id = this.id 
         const modifier = this.textContent
+
+        // if max allowable length hit then do nothing and exit function
+        if (digitArray.length >= 16) {
+            return calcMemory.memoryLog(`Pressed ${modifier}; Max allowable digits reached`);
+        }
 
         // if they click the decimal button
         if (id == 'decimal') {
@@ -66,59 +95,19 @@ keypad.forEach(child => {
             if (!screen.textContent.includes('.')) {
                 // append a decimal to what is shown on screen
                 screen.textContent += '.'
-                // ensure that next digit pressed is the tenths place
-                updateCalcMemoryItem('decimalFlag', true)
+                // // ensure that next digit pressed is the tenths place
+                // updateCalcMemoryItem('decimalFlag', true)
             }
-        } else if (calcMemory.decimalFlag === true) {
-            // this digit needs to be in the tenths place
-            const originalNumber = new Big(screen.textContent);     // takes a string and converts to Big
-            const newDigit = modifier                               // takes the string version
-    
-            // Get the original coefficient array
-            const originalCoefficient = originalNumber.c;
-    
-            // Create a new coefficient array by adding the new digit
-            const newCoefficient = [...originalCoefficient, '.', newDigit];
-    
-            // Create a new Big number with the updated coefficient
-            const newNumber = new Big(newCoefficient.join(''))
-            const updatedNumber = newNumber.toFixed(1)
-    
-            updateCalcMemoryItem(calcMemory.screenStatus, updatedNumber)
-            updateCalcMemoryItem('decimalFlag', false)
-            updateScreen(updatedNumber)
         } else {
-            if (!screen.textContent.includes('.')) {
-                // When a digit is pressed and the number does not have decimals
-                const originalNumber = new Big(screen.textContent);     // takes a string and converts to Big
-                const newDigit = Number(modifier)                       // takes the Number version
-        
-                // Get the original coefficient array
-                const originalCoefficient = originalNumber.c;
-                
-                // Create a new coefficient array by adding the new digit
-                const newCoefficient = [...originalCoefficient, newDigit];
-        
-                // Create a new Big number with the updated coefficient
-                const updatedNumber = new Big(newCoefficient.join(''))
-        
-                updateCalcMemoryItem(calcMemory.screenStatus, updatedNumber)
-                updateScreen(updatedNumber)
+            if (inputString === '0') {
+                screen.textContent = modifier
             } else {
-                // When a digit is pressed and the number has decimals
-                const originalNumber = [...screen.textContent]
-                const newDigit = modifier
-
-                const newCoefficient = [...originalNumber, newDigit]
-                const newString = newCoefficient.join('')
-
-                const updatedNumber = new Big(newString)
-                
-                updateCalcMemoryItem(calcMemory.screenStatus, updatedNumber)
-                updateScreen(newString)
+                console.log(`oldString: ${screen.textContent}`)
+                let newString = screen.textContent += modifier
+                console.log(`newString: ${newString}`)
+                screen.textContent = formatValue(newString)
+                console.log(`displayString: ${screen.textContent}`)
             }
-            
-            
         }
 
         calcMemory.memoryLog(`Pressed ${modifier}`)
@@ -137,7 +126,55 @@ screen.textContent = calcMemory[calcMemory.screenStatus]
 
 
 
+// else if (calcMemory.decimalFlag === true) {
+//     // this digit needs to be in the tenths place
+//     const originalNumber = new Big(screen.textContent);     // takes a string and converts to Big
+//     const newDigit = modifier                               // takes the string version
 
+//     // Get the original coefficient array
+//     const originalCoefficient = originalNumber.c;
+
+//     // Create a new coefficient array by adding the new digit
+//     const newCoefficient = [...originalCoefficient, '.', newDigit];
+
+//     // Create a new Big number with the updated coefficient
+//     const newNumber = new Big(newCoefficient.join(''))
+//     const updatedNumber = newNumber.toFixed(1)
+
+//     updateCalcMemoryItem(calcMemory.screenStatus, updatedNumber)
+//     updateCalcMemoryItem('decimalFlag', false)
+//     updateScreen(updatedNumber)
+// } else {
+//     if (!screen.textContent.includes('.')) {
+//         // When a digit is pressed and the number does not have decimals
+//         const originalNumber = new Big(screen.textContent);     // takes a string and converts to Big
+//         const newDigit = Number(modifier)                       // takes the Number version
+
+//         // Get the original coefficient array
+//         const originalCoefficient = originalNumber.c;
+        
+//         // Create a new coefficient array by adding the new digit
+//         const newCoefficient = [...originalCoefficient, newDigit];
+
+//         // Create a new Big number with the updated coefficient
+//         const updatedNumber = new Big(newCoefficient.join(''))
+
+//         updateCalcMemoryItem(calcMemory.screenStatus, updatedNumber)
+//         updateScreen(updatedNumber)
+//     } else {
+//         // When a digit is pressed and the number has decimals
+//         const originalNumber = [...screen.textContent]
+//         const newDigit = modifier
+
+//         const newCoefficient = [...originalNumber, newDigit]
+//         const newString = newCoefficient.join('')
+
+//         const updatedNumber = new Big(newString)
+        
+//         updateCalcMemoryItem(calcMemory.screenStatus, updatedNumber)
+//         updateScreen(newString)
+//     }
+// }
 
 // TESTING BELOW
 
