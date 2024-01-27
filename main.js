@@ -5,6 +5,7 @@ const calcMemoryTemplate = {
     firstValue: 0,
     secondValue: null,
     decimalFlag: false,
+    scientificNotationFlag: false,
     pendingOperation: null,     // add, subtract, multiply, divide
     calculatedValue: null,      // the result of the operation
     lastOperation: null,        // stored function that when used will do the pendingOperation
@@ -55,10 +56,10 @@ const keypad = [...childrenOfDigits, ...childrenOfZeroAndDecimal]
 
 keypad.forEach(child => {
     child.addEventListener('click', function () {
-        // Updates the screen when a digit (0, 1-9, or decimal) is pressed
+        // Updates the screen when a digit (0, 1-9, or decimal) is pressed     
         const id = this.id 
         const modifier = this.textContent
-        
+
         // if they click the decimal button
         if (id == 'decimal') {
             // if the value show on screen doesn't have a decimal
