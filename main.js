@@ -6,7 +6,7 @@ const calcMemoryTemplate = {
     secondValue: null,
     decimalFlag: false,
     maxDigitFlag: false,
-    pendingOperation: null,     // add, subtract, multiply, divide
+    pendingOperation: null,     // plus, minus, times, divide
     calculatedValue: null,      // the result of the operation
     lastOperation: null,        // stored function that when used will do the pendingOperation
     equalsFlag: false,          // used to indicate if equals button was pressed
@@ -43,7 +43,6 @@ function formatValue(value) {
     // Convert the string to an array of characters
     const characters = value.split('');
     const charactersNoCommas = characters.filter(value => value !== ',')
-    console.log(charactersNoCommas)
     let startingIndex = charactersNoCommas.length - 3
     
     if (characters.indexOf('.') > -1) {
@@ -62,7 +61,7 @@ function formatValue(value) {
 }
 
 
-// add event listeners to buttons
+// add click event listeners to keypad button
 const digits = document.getElementById('digits')
 const zeroAndDecimal = document.getElementById('zeroAndDecimal')
 
@@ -71,7 +70,6 @@ const childrenOfZeroAndDecimal = zeroAndDecimal.querySelectorAll('button')
 
 const keypad = [...childrenOfDigits, ...childrenOfZeroAndDecimal]
 
-// add click events for keypad
 keypad.forEach(child => {
     child.addEventListener('click', function () {
         
@@ -102,11 +100,8 @@ keypad.forEach(child => {
             if (inputString === '0') {
                 screen.textContent = modifier
             } else {
-                console.log(`oldString: ${screen.textContent}`)
                 let newString = screen.textContent += modifier
-                console.log(`newString: ${newString}`)
                 screen.textContent = formatValue(newString)
-                console.log(`displayString: ${screen.textContent}`)
             }
         }
 
@@ -115,10 +110,37 @@ keypad.forEach(child => {
     
 })
 
-// func to perform arithmatic to get calculatedValue
 
-// func to clear/reset calcMemory
+// 
 
+// Takes firstValue, secondValue, and pendingOperation
+// ..generates equation to perform and stores it in lastOperation
+// ..executes equation and updates calculatedValue
+
+// add click events for rightControls buttons
+const divideButton = document.getElementById('divide')
+divideButton.addEventListener('click', function () {
+    calcMemory.pendingOperation = this.id
+    calcMemory.memoryLog(`Pressed ${this.id}`)
+})
+
+const timesButton = document.getElementById('times')
+timesButton.addEventListener('click', function () {
+    calcMemory.pendingOperation = this.id
+    calcMemory.memoryLog(`Pressed ${this.id}`)
+})
+
+const minusButton = document.getElementById('minus')
+minusButton.addEventListener('click', function () {
+    calcMemory.pendingOperation = this.id
+    calcMemory.memoryLog(`Pressed ${this.id}`)
+})
+
+const plusButton = document.getElementById('plus')
+plusButton.addEventListener('click', function () {
+    calcMemory.pendingOperation = this.id
+    calcMemory.memoryLog(`Pressed ${this.id}`)
+})
 
 
 screen.textContent = calcMemory[calcMemory.screenStatus]
