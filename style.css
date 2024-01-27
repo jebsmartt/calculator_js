@@ -5,14 +5,102 @@
 
 body {
     background-color: grey;
-    padding: 10px;
 }
 
-.keypadButton {
-    background-color: orange;
-    flex-basis: calc(33.33% - 10px); /* Set the max width for each item, considering spacing */
+#page {
+
+    display: flex;
+    justify-content: center;
 }
 
-.operatorButton {
-    flex-basis: calc(100% - 10px); /* Set the max width for each item, considering spacing */
+#calculator {
+    background-color: black;
+    padding: 20px;
+    border-radius: 10px;
+
+    flex-basis: 500px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+#calculator button {
+    border: none;
+    border-radius: 5px;
+}
+
+#screen {
+    background-color: rgb(209, 194, 162);
+    text-align: right;
+    padding: 7px;
+
+}
+
+#controls {
+    
+
+    display: flex;
+    /* flex LR */
+}
+
+#leftControls {
+    
+    flex-grow: 3;
+
+    display: flex;
+    flex-direction: column;
+}
+
+#rightControls {
+    gap: 7px;
+
+    flex-grow: 1;
+    justify-content: flex-end;
+
+    display: flex;
+    flex-direction: column;
+}
+
+#specialOperators {
+    gap: 7px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    color: black;
+
+    display: flex;;
+}
+
+#digits {
+    gap: 7px;
+
+    display: flex;
+    flex-wrap: wrap-reverse;
+}
+
+#zeroAndDecimal {
+    gap: 7px;
+    padding-top: 7px;
+
+    display: flex;
+}
+
+#zero {
+    flex-basis: calc(66.66% - 7px);
+}
+
+#decimal {
+    flex-basis: calc(33.33% - 7px);
+}
+
+.digit {
+    background-color: rgb(88, 84, 84);
+    color: white;
+
+    flex-basis: calc(33.33% - 7px);
+}
+
+.rightOperator {
+    background-color: rgb(247, 177, 47);
+    color: white;
 }
