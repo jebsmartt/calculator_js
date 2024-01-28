@@ -37,43 +37,72 @@ function getCalcMem (key) {
 let screen = document.getElementById('screen')
 
 function formatValue(value) {
-    BigCoef = Big();
-    BigCoef.DP = 6;
-    if (value.includes('e')) {
-        // what to do if in scientific notation
-        const parts = value.split('e')
-
-        coefficient = BigCoef(parts[0])
-        roundedCoefficient = coefficient.div(1)
-        
-        parts.splice(0,1,roundedCoefficient.toString())
-        const formattedValue = parts.join('e')
-        return formattedValue
-
-    } else {
+    const formatToggle = false
+    
+    if (formatToggle) {
+        // expects a string and all formatting should be string methods
         // Convert the string to an array of characters
         const characters = value.split('')
+        // Filter the array down to just digits and decimal
         const charactersNoCommas = characters.filter(value => /[0-9.]/.test(value))
-        coefficient = BigCoef(charactersNoCommas.join(''))
-        console.log(coefficient.toString())
-        roundedCoefficient = coefficient.div(1).toString().split('')
-        let startingIndex = roundedCoefficient.length - 3
-        
-        if (roundedCoefficient.indexOf('.') > -1) {
-            startingIndex = roundedCoefficient.indexOf('.') - 3
-        } 
+        // Determine where to start the for loop to add commas back in
+        let startingIndex = charactersNoCommas.length - 3
+        if (charactersNoCommas.indexOf('.') > -1) {
+            startingIndex = charactersNoCommas.indexOf('.') - 3
+        }
     
         // Iterate over the characters in reverse order
         for (let i = startingIndex; i > 0; i -= 3) {
             // Insert a comma after every group of three digits
-            roundedCoefficient.splice(i, 0, ',')
+            charactersNoCommas.splice(i, 0, ',')
         }
-
+    
         // Join the characters back into a string with commas
-        const formattedValue = roundedCoefficient.join('')
-
+        const formattedValue = charactersNoCommas.join('')
+    
         return formattedValue
+    } else {
+        return value
     }
+    
+
+    // BigCoef = Big();
+    // BigCoef.DP = 6;
+    // if (value.includes('e')) {
+    //     // what to do if in scientific notation
+    //     const parts = value.split('e')
+
+    //     coefficient = BigCoef(parts[0])
+    //     roundedCoefficient = coefficient.div(1)
+        
+    //     parts.splice(0,1,roundedCoefficient.toString())
+    //     const formattedValue = parts.join('e')
+    //     return formattedValue
+
+    // } else {
+    //     // Convert the string to an array of characters
+    //     const characters = value.split('')
+    //     const charactersNoCommas = characters.filter(value => /[0-9.]/.test(value))
+    //     coefficient = BigCoef(charactersNoCommas.join(''))
+    //     console.log(coefficient.toString())
+    //     roundedCoefficient = coefficient.div(1).toString().split('')
+    //     let startingIndex = roundedCoefficient.length - 3
+        
+    //     if (roundedCoefficient.indexOf('.') > -1) {
+    //         startingIndex = roundedCoefficient.indexOf('.') - 3
+    //     } 
+    
+    //     // Iterate over the characters in reverse order
+    //     for (let i = startingIndex; i > 0; i -= 3) {
+    //         // Insert a comma after every group of three digits
+    //         roundedCoefficient.splice(i, 0, ',')
+    //     }
+
+    //     // Join the characters back into a string with commas
+    //     const formattedValue = roundedCoefficient.join('')
+
+    //     return formattedValue
+    // }
 }
 
 function clearCalcMem () {
@@ -258,6 +287,7 @@ equalsButton.addEventListener('click', function () {
             getCalcMem('secondValue')
         ))
         screen.textContent = formatValue(getCalcMem('calculatedValue').toString())
+
     }
     calcMemory.memoryLog(`Pressed ${this.id}`)
 })
