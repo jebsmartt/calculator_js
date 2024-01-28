@@ -2,5 +2,5 @@
 
 
 TODO
-+ Try to implement a max character input
-+ Ensure that arithmatic with scientific notation works
++ allow for a user to make a number negative
++ submit to Odin and MOVE ON!
