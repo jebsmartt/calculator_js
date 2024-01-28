@@ -157,28 +157,50 @@ keypad.forEach(child => {
 
 const rightControls = document.getElementById('rightControls')
 
+// click event behavior of plus, minus, divide, and times
 const notEquals = rightControls.querySelectorAll(':not(#equals)')
 notEquals.forEach(opButton => {
     opButton.addEventListener('click', function () {
-        // set pendingOperation to the corresponding operator (e.g. divide)
-        updateCalcMem('pendingOperation', this.id)
         
+        
+        // Update values in memory
         switch (calcMemory.screenStatus) {
             case 'firstValue':
+                // set pendingOperation to the corresponding operator (e.g. divide)
+                updateCalcMem('pendingOperation', this.id)
                 // if on firstValue and they click operator then we need a secondValue
                 updateCalcMem('firstValue', convertToBig(screen.textContent));
                 break;
             case 'secondValue':
-                // if on secondValue and click op
-                // ..then we execute operatation between first and second value
+                // if on secondValue and click operator
+                // ..set secondValue in calcMemory
+                updateCalcMem('secondValue', convertToBig(screen.textContent))
+                // ..then we execute operation between first and second value
+                // trigger the calculation and store result in calculatedValue
+                updateCalcMem('calculatedValue', bigMath(
+                    getCalcMem('pendingOperation'),
+                    getCalcMem('firstValue'),
+                    getCalcMem('secondValue')
+                ))
                 // ..the we store the result of that operation as the firstValue and update the screen
+                updateCalcMem('firstValue', getCalcMem('calculatedValue'))
+                screen.textContent = getCalcMem('firstValue').toString()
+                updateCalcMem('screenStatus','firstValue')
+                // set pendingOperation to the corresponding operator (e.g. divide)
+                updateCalcMem('pendingOperation', this.id)
+
                 // ..then we need to get a secondValue from the user
-    
+
                 break;
             case 'calculatedValue':
-                // if on calculatedValue and click op
-                // ..then we assign calculatedValue to firstValue
+                // set pendingOperation to the corresponding operator (e.g. divide)
+                updateCalcMem('pendingOperation', this.id)    
+                
+                // if on calculatedValue and click operation
+                // ..then we set firstValue equal to calculatedValue
+                updateCalcMem('firstValue', getCalcMem('calculatedValue'))
                 // ..now we need to get secondvalue from the user
+                updateCalcMem('screenStatus', 'firstValue')     // because we are now showing firstValue
                 break;
             default:
                 break;
