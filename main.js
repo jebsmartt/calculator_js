@@ -1,15 +1,14 @@
 
 // Handle the memory of the calculator
 const calcMemoryTemplate = {
-    screenStatus: 'firstValue',   // firstValue, secondValue, or calculatedValue
-    firstValue: 0,
-    secondValue: null,
+    screenStatus: 'firstValue',     // firstValue, secondValue, or calculatedValue
+    firstValue: '0',                // stored as Big 
+    secondValue: null,              // stored as Big
     decimalFlag: false,
-    maxDigitFlag: false,
-    pendingOperation: null,     // plus, minus, times, divide
-    calculatedValue: null,      // the result of the operation
-    lastOperation: null,        // stored function that when used will do the pendingOperation
-    equalsFlag: false,          // used to indicate if equals button was pressed
+    pendingOperation: null,         // plus, minus, times, divide
+    calculatedValue: null,          // the result of the operation as a Big
+    lastOperation: null,            // stored function that when used will do the pendingOperation
+    equalsFlag: false,              // used to indicate if equals button was pressed
     memoryLog: function (action) {
         // Get the keys of the object
         const keys = Object.keys(calcMemory).filter(key => (
@@ -29,12 +28,16 @@ const calcMemoryTemplate = {
 let calcMemory = { ...calcMemoryTemplate }
 
 // func to update a value in calcMemory
-function updateCalcMemoryItem (key, value) {
+function updateCalcMem (key, value) {
     calcMemory[key] = value
 }
 
-function getCalcMemoryItem (key) {
+function getCalcMem (key) {
     return calcMemory[key]
+}
+
+function clearCalcMem () {
+    calcMemory = { ...calcMemoryTemplate }
 }
 
 let screen = document.getElementById('screen')
@@ -87,21 +90,57 @@ keypad.forEach(child => {
             return calcMemory.memoryLog(`Pressed ${modifier}; Max allowable digits reached`);
         }
 
-        // if they click the decimal button
-        if (id == 'decimal') {
-            // if the value show on screen doesn't have a decimal
-            if (!screen.textContent.includes('.')) {
-                // append a decimal to what is shown on screen
-                screen.textContent += '.'
-                // // ensure that next digit pressed is the tenths place
-                // updateCalcMemoryItem('decimalFlag', true)
-            }
-        } else {
-            if (inputString === '0') {
-                screen.textContent = modifier
+        if (getCalcMem('screenStatus') === 'firstValue' && !getCalcMem('pendingOperation')) {
+            // if they click the decimal button
+            if (id == 'decimal') {
+                // if the value show on screen doesn't have a decimal
+                if (!screen.textContent.includes('.')) {
+                    // append a decimal to what is shown on screen
+                    screen.textContent += '.'
+                    // // ensure that next digit pressed is the tenths place
+                    // updateCalcMemoryItem('decimalFlag', true)
+                }
             } else {
-                let newString = screen.textContent += modifier
-                screen.textContent = formatValue(newString)
+                if (inputString === '0') {
+                    screen.textContent = modifier
+                } else {
+                    let newString = screen.textContent += modifier
+                    screen.textContent = formatValue(newString)
+                }
+            }
+        } else if (getCalcMem('screenStatus') === 'firstValue' && getCalcMem('pendingOperation')) {
+            // Catch situation where the screen is still showing fv but we have a pending operation
+            updateCalcMem('screenStatus','secondValue');
+
+            if (id == 'decimal') {
+                    screen.textContent = '0.'
+            } else {
+                screen.textContent = modifier
+            }
+        } else if (getCalcMem('screenStatus') === 'secondValue') {
+            if (id == 'decimal') {
+                // if the value show on screen doesn't have a decimal
+                if (!screen.textContent.includes('.')) {
+                    // append a decimal to what is shown on screen
+                    screen.textContent += '.'
+                    // // ensure that next digit pressed is the tenths place
+                    // updateCalcMemoryItem('decimalFlag', true)
+                }
+            } else {
+                if (inputString === '0') {
+                    screen.textContent = modifier
+                } else {
+                    let newString = screen.textContent += modifier
+                    screen.textContent = formatValue(newString)
+                }
+            }
+        } else if (getCalcMem('screenStatus') === 'calculatedValue') {
+            clearCalcMem()
+
+            if (id == 'decimal') {
+                screen.textContent = '0.'
+            } else {
+            screen.textContent = modifier
             }
         }
 
@@ -111,92 +150,100 @@ keypad.forEach(child => {
 })
 
 
-// 
 
-// Takes firstValue, secondValue, and pendingOperation
-// ..generates equation to perform and stores it in lastOperation
-// ..executes equation and updates calculatedValue
+const rightControls = document.getElementById('rightControls')
 
-// add click events for rightControls buttons
-const divideButton = document.getElementById('divide')
-divideButton.addEventListener('click', function () {
-    calcMemory.pendingOperation = this.id
+const notEquals = rightControls.querySelectorAll(':not(#equals)')
+notEquals.forEach(opButton => {
+    opButton.addEventListener('click', function () {
+        updateCalcMem('pendingOperation', this.id)
+        
+        switch (calcMemory.screenStatus) {
+            case 'firstValue':
+                // if on firstValue and they click op then we need a secondValue
+                updateCalcMem('firstValue', convertToBig(screen.textContent));
+                break;
+            case 'secondValue':
+                // if on secondValue and click op
+                // ..then we execute operatation between first and second value
+                // ..the we store the result of that operation as the firstValue and update the screen
+                // ..then we need to get a secondValue from the user
+    
+                break;
+            case 'calculatedValue':
+                // if on calculatedValue and click op
+                // ..then we assign calculatedValue to firstValue
+                // ..now we need to get secondvalue from the user
+                break;
+            default:
+                break;
+        }
+
+        calcMemory.memoryLog(`Pressed ${this.id}`)
+    })
+})
+
+const equalsButton = document.getElementById('equals')
+equalsButton.addEventListener('click', function () {
+    // Refrences firstValue, secondValue, and pendingOperation
+    // ..generates equation to perform and stores it in lastOperation
+    // ..executes equation and updates calculatedValue
+    if (calcMemory.screenStatus === 'firstValue') {
+        // TODO
+    } else if (calcMemory.screenStatus === 'secondValue') {
+        updateCalcMem('secondValue', convertToBig(screen.textContent))
+        // trigger the calculation and store result in calculatedValue
+        updateCalcMem('calculatedValue', bigMath(
+            getCalcMem('pendingOperation'),
+            getCalcMem('firstValue'),
+            getCalcMem('secondValue')
+        ))
+        screen.textContent = getCalcMem('calculatedValue').toString()
+        updateCalcMem('screenStatus','calculatedValue')
+    } else if (calcMemory.screenStatus === 'calculatedValue') {
+        // TODO
+    }
     calcMemory.memoryLog(`Pressed ${this.id}`)
 })
 
-const timesButton = document.getElementById('times')
-timesButton.addEventListener('click', function () {
-    calcMemory.pendingOperation = this.id
-    calcMemory.memoryLog(`Pressed ${this.id}`)
-})
+function convertToBig(valueWithCommas) {
+    // returns value as Big
+    const numericString = valueWithCommas.replace(/,/g, '');
+    const bigNumber = new Big(numericString)
+    return bigNumber
+}
 
-const minusButton = document.getElementById('minus')
-minusButton.addEventListener('click', function () {
-    calcMemory.pendingOperation = this.id
-    calcMemory.memoryLog(`Pressed ${this.id}`)
-})
+function bigMath(operator, fv, sv) {
+    try {
+        if (fv instanceof Big && sv instanceof Big) {
+            // keep going
+        } else {
+            // fv or sv is not an instance of Big
+            throw new Error('bigMath was not provided instances of Big');
+        }
+    } catch (error) {
+        // Handle the error
+        console.error(error.message);
+    }
+    
+    switch (operator) {
+        case 'plus':
+            return fv.plus(sv)
+        case 'minus':
+            return fv.minus(sv)
+        case 'times':
+            return fv.times(sv)
+        case 'divide':
+            return fv.div(sv)
+        default:
+            break;
+    }
+}
 
-const plusButton = document.getElementById('plus')
-plusButton.addEventListener('click', function () {
-    calcMemory.pendingOperation = this.id
-    calcMemory.memoryLog(`Pressed ${this.id}`)
-})
-
-
+// Set default value to zero on screen
 screen.textContent = calcMemory[calcMemory.screenStatus]
 
 
-
-
-// else if (calcMemory.decimalFlag === true) {
-//     // this digit needs to be in the tenths place
-//     const originalNumber = new Big(screen.textContent);     // takes a string and converts to Big
-//     const newDigit = modifier                               // takes the string version
-
-//     // Get the original coefficient array
-//     const originalCoefficient = originalNumber.c;
-
-//     // Create a new coefficient array by adding the new digit
-//     const newCoefficient = [...originalCoefficient, '.', newDigit];
-
-//     // Create a new Big number with the updated coefficient
-//     const newNumber = new Big(newCoefficient.join(''))
-//     const updatedNumber = newNumber.toFixed(1)
-
-//     updateCalcMemoryItem(calcMemory.screenStatus, updatedNumber)
-//     updateCalcMemoryItem('decimalFlag', false)
-//     updateScreen(updatedNumber)
-// } else {
-//     if (!screen.textContent.includes('.')) {
-//         // When a digit is pressed and the number does not have decimals
-//         const originalNumber = new Big(screen.textContent);     // takes a string and converts to Big
-//         const newDigit = Number(modifier)                       // takes the Number version
-
-//         // Get the original coefficient array
-//         const originalCoefficient = originalNumber.c;
-        
-//         // Create a new coefficient array by adding the new digit
-//         const newCoefficient = [...originalCoefficient, newDigit];
-
-//         // Create a new Big number with the updated coefficient
-//         const updatedNumber = new Big(newCoefficient.join(''))
-
-//         updateCalcMemoryItem(calcMemory.screenStatus, updatedNumber)
-//         updateScreen(updatedNumber)
-//     } else {
-//         // When a digit is pressed and the number has decimals
-//         const originalNumber = [...screen.textContent]
-//         const newDigit = modifier
-
-//         const newCoefficient = [...originalNumber, newDigit]
-//         const newString = newCoefficient.join('')
-
-//         const updatedNumber = new Big(newString)
-        
-//         updateCalcMemoryItem(calcMemory.screenStatus, updatedNumber)
-//         updateScreen(newString)
-//     }
-// }
 
 // TESTING BELOW
 
