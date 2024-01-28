@@ -300,20 +300,3 @@ function bigMath(operator, fv, sv) {
 // Set default value to zero on screen
 screen.textContent = calcMemory[calcMemory.screenStatus]
 
-
-
-// TESTING BELOW
-
-// BigTest = Big();
-
-// BigTest.DP = 6;
-
-
-// x = BigTest('6,666');
-
-
-// a = x.div(1)     // 1.667
-
-
-// console.log(a.toString())
-
