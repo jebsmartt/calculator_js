@@ -36,10 +36,6 @@ function getCalcMem (key) {
     return calcMemory[key]
 }
 
-function clearCalcMem () {
-    calcMemory = { ...calcMemoryTemplate }
-}
-
 let screen = document.getElementById('screen')
 
 function formatValue(value) {
@@ -63,6 +59,14 @@ function formatValue(value) {
     return formattedValue
 }
 
+function clearCalcMem () {
+    calcMemory = { ...calcMemoryTemplate }
+    screen.textContent = '0'
+}
+
+// Let the clear button clear the calcMemory
+const allClear = document.getElementById('clear')
+allClear.addEventListener('click', clearCalcMem)
 
 // add click event listeners to keypad button
 const digits = document.getElementById('digits')
@@ -156,11 +160,12 @@ const rightControls = document.getElementById('rightControls')
 const notEquals = rightControls.querySelectorAll(':not(#equals)')
 notEquals.forEach(opButton => {
     opButton.addEventListener('click', function () {
+        // set pendingOperation to the corresponding operator (e.g. divide)
         updateCalcMem('pendingOperation', this.id)
         
         switch (calcMemory.screenStatus) {
             case 'firstValue':
-                // if on firstValue and they click op then we need a secondValue
+                // if on firstValue and they click operator then we need a secondValue
                 updateCalcMem('firstValue', convertToBig(screen.textContent));
                 break;
             case 'secondValue':
@@ -189,7 +194,7 @@ equalsButton.addEventListener('click', function () {
     // ..generates equation to perform and stores it in lastOperation
     // ..executes equation and updates calculatedValue
     if (calcMemory.screenStatus === 'firstValue') {
-        // TODO
+        // Do nothing
     } else if (calcMemory.screenStatus === 'secondValue') {
         updateCalcMem('secondValue', convertToBig(screen.textContent))
         // trigger the calculation and store result in calculatedValue
@@ -201,7 +206,14 @@ equalsButton.addEventListener('click', function () {
         screen.textContent = getCalcMem('calculatedValue').toString()
         updateCalcMem('screenStatus','calculatedValue')
     } else if (calcMemory.screenStatus === 'calculatedValue') {
-        // TODO
+        // Set the fv to cv of the last operation (aka whats on the screen)
+        updateCalcMem('firstValue', getCalcMem('calculatedValue'))
+        updateCalcMem('calculatedValue', bigMath(
+            getCalcMem('pendingOperation'),
+            getCalcMem('firstValue'),
+            getCalcMem('secondValue')
+        ))
+        screen.textContent = getCalcMem('calculatedValue').toString()
     }
     calcMemory.memoryLog(`Pressed ${this.id}`)
 })
@@ -239,6 +251,7 @@ function bigMath(operator, fv, sv) {
             break;
     }
 }
+
 
 // Set default value to zero on screen
 screen.textContent = calcMemory[calcMemory.screenStatus]
