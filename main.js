@@ -1,19 +1,17 @@
+Big.PE = 15
+
 
 // Handle the memory of the calculator
 const calcMemoryTemplate = {
     screenStatus: 'firstValue',     // firstValue, secondValue, or calculatedValue
     firstValue: '0',                // stored as Big 
     secondValue: null,              // stored as Big
-    decimalFlag: false,
     pendingOperation: null,         // plus, minus, times, divide
     calculatedValue: null,          // the result of the operation as a Big
-    lastOperation: null,            // stored function that when used will do the pendingOperation
     equalsFlag: false,              // used to indicate if equals button was pressed
     memoryLog: function (action) {
         // Get the keys of the object
-        const keys = Object.keys(calcMemory).filter(key => (
-            key !== 'memoryLog' && key !== 'lastOperation')
-            );
+        const keys = Object.keys(calcMemory).filter(key => (key !== 'memoryLog'));
 
         // Map each key to a string in the format "key: value"
         const keyValuePairs = keys.map(key => `${key}: ${this[key]}`);
@@ -39,24 +37,43 @@ function getCalcMem (key) {
 let screen = document.getElementById('screen')
 
 function formatValue(value) {
-    // Convert the string to an array of characters
-    const characters = value.split('');
-    const charactersNoCommas = characters.filter(value => value !== ',')
-    let startingIndex = charactersNoCommas.length - 3
-    
-    if (characters.indexOf('.') > -1) {
-        startingIndex = characters.indexOf('.') - 4
-    } 
+    BigCoef = Big();
+    BigCoef.DP = 6;
+    if (value.includes('e')) {
+        // what to do if in scientific notation
+        const parts = value.split('e')
 
-    // Iterate over the characters in reverse order
-    for (let i = startingIndex; i > 0; i -= 3) {
-        // Insert a comma after every group of three digits
-        charactersNoCommas.splice(i, 0, ',');
-    }
+        coefficient = BigCoef(parts[0])
+        roundedCoefficient = coefficient.div(1)
+        
+        parts.splice(0,1,roundedCoefficient.toString())
+        const formattedValue = parts.join('e')
+        return formattedValue
+
+    } else {
+        // Convert the string to an array of characters
+        const characters = value.split('')
+        const charactersNoCommas = characters.filter(value => /[0-9.]/.test(value))
+        coefficient = BigCoef(charactersNoCommas.join(''))
+        console.log(coefficient.toString())
+        roundedCoefficient = coefficient.div(1).toString().split('')
+        let startingIndex = roundedCoefficient.length - 3
+        
+        if (roundedCoefficient.indexOf('.') > -1) {
+            startingIndex = roundedCoefficient.indexOf('.') - 3
+        } 
     
-    // Join the characters back into a string with commas
-    const formattedValue = charactersNoCommas.join('');
-    return formattedValue
+        // Iterate over the characters in reverse order
+        for (let i = startingIndex; i > 0; i -= 3) {
+            // Insert a comma after every group of three digits
+            roundedCoefficient.splice(i, 0, ',')
+        }
+
+        // Join the characters back into a string with commas
+        const formattedValue = roundedCoefficient.join('')
+
+        return formattedValue
+    }
 }
 
 function clearCalcMem () {
@@ -82,17 +99,10 @@ keypad.forEach(child => {
         
         // get the string from the screen
         const inputString = screen.textContent
-        // create an array of digits found
-        const digitArray = inputString.match(/\d/g);
         
         // get id and value of the button pressed
         const id = this.id 
         const modifier = this.textContent
-
-        // if max allowable length hit then do nothing and exit function
-        if (digitArray.length >= 16) {
-            return calcMemory.memoryLog(`Pressed ${modifier}; Max allowable digits reached`);
-        }
 
         if (getCalcMem('screenStatus') === 'firstValue' && !getCalcMem('pendingOperation')) {
             // if they click the decimal button
@@ -101,16 +111,16 @@ keypad.forEach(child => {
                 if (!screen.textContent.includes('.')) {
                     // append a decimal to what is shown on screen
                     screen.textContent += '.'
-                    // // ensure that next digit pressed is the tenths place
-                    // updateCalcMemoryItem('decimalFlag', true)
                 }
+            } else if (inputString === '0') {
+                screen.textContent = modifier
             } else {
-                if (inputString === '0') {
-                    screen.textContent = modifier
-                } else {
-                    let newString = screen.textContent += modifier
-                    screen.textContent = formatValue(newString)
+                if (digitLimitReached(inputString, modifier)) {
+                    return calcMemory.memoryLog(`Pressed ${modifier}; Max allowable digits reached`)
                 }
+
+                let newString = screen.textContent += modifier
+                screen.textContent = formatValue(newString)
             }
         } else if (getCalcMem('screenStatus') === 'firstValue' && getCalcMem('pendingOperation')) {
             // Catch situation where the screen is still showing fv but we have a pending operation
@@ -127,13 +137,15 @@ keypad.forEach(child => {
                 if (!screen.textContent.includes('.')) {
                     // append a decimal to what is shown on screen
                     screen.textContent += '.'
-                    // // ensure that next digit pressed is the tenths place
-                    // updateCalcMemoryItem('decimalFlag', true)
                 }
             } else {
                 if (inputString === '0') {
                     screen.textContent = modifier
                 } else {
+                    if (digitLimitReached(inputString, modifier)) {
+                        return calcMemory.memoryLog(`Pressed ${modifier}; Max allowable digits reached`)
+                    }
+                    
                     let newString = screen.textContent += modifier
                     screen.textContent = formatValue(newString)
                 }
@@ -153,6 +165,17 @@ keypad.forEach(child => {
     
 })
 
+function digitLimitReached(inputString, modifier) {
+    // create an array of digits found
+    const digitArray = inputString.match(/\d/g);
+
+    // if max allowable length hit then do nothing and exit function
+    if (digitArray.length + 1 >= 16) {
+        return true
+    }
+
+    return false;
+}
 
 
 const rightControls = document.getElementById('rightControls')
@@ -213,7 +236,6 @@ notEquals.forEach(opButton => {
 const equalsButton = document.getElementById('equals')
 equalsButton.addEventListener('click', function () {
     // Refrences firstValue, secondValue, and pendingOperation
-    // ..generates equation to perform and stores it in lastOperation
     // ..executes equation and updates calculatedValue
     if (calcMemory.screenStatus === 'firstValue') {
         // Do nothing
@@ -225,7 +247,7 @@ equalsButton.addEventListener('click', function () {
             getCalcMem('firstValue'),
             getCalcMem('secondValue')
         ))
-        screen.textContent = getCalcMem('calculatedValue').toString()
+        screen.textContent = formatValue(getCalcMem('calculatedValue').toString())
         updateCalcMem('screenStatus','calculatedValue')
     } else if (calcMemory.screenStatus === 'calculatedValue') {
         // Set the fv to cv of the last operation (aka whats on the screen)
@@ -235,7 +257,7 @@ equalsButton.addEventListener('click', function () {
             getCalcMem('firstValue'),
             getCalcMem('secondValue')
         ))
-        screen.textContent = getCalcMem('calculatedValue').toString()
+        screen.textContent = formatValue(getCalcMem('calculatedValue').toString())
     }
     calcMemory.memoryLog(`Pressed ${this.id}`)
 })
@@ -282,21 +304,16 @@ screen.textContent = calcMemory[calcMemory.screenStatus]
 
 // TESTING BELOW
 
+// BigTest = Big();
+
+// BigTest.DP = 6;
 
 
-// // this digit needs to be in the tenths place
-// const originalNumber = new Big('12345');     // takes a string and converts to Big
-// const newDigit = String(0)
-
-// // Get the original coefficient array
-// const originalCoefficient = originalNumber.c.map(String);
+// x = BigTest('6,666');
 
 
-// // Create a new coefficient array by adding the new digit
-// const newCoefficient = [...originalCoefficient, '.', newDigit];
+// a = x.div(1)     // 1.667
 
-// // Create a new Big number with the updated coefficient
-// const newNumber = new Big(newCoefficient.join(''))
-// const updatedNumber = newNumber.toFixed(1)
 
-// console.log(updatedNumber.toString())
+// console.log(a.toString())
+
