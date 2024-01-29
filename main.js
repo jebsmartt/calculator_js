@@ -91,6 +91,12 @@ function formatValue(value) {
         
         // Convert the string to an array of characters
         const characters = value.split('')
+        // check if value is negative
+        let negativeFlag = false
+        if (characters[0] === "-") {
+            negativeFlag = true
+        }
+
         // Filter the array down to just digits and decimal
         const charactersNoCommas = characters.filter(char => /[0-9.]/.test(char))
         // Determine where to start the for loop
@@ -105,9 +111,14 @@ function formatValue(value) {
             charactersNoCommas.splice(i, 0, ',')
         }
     
+        // Check if it needs to be negative
+        if (negativeFlag) {
+            charactersNoCommas.splice(0,0,"-")
+        }
+        
         // Join the characters back into a string with commas
         const formattedValue = charactersNoCommas.join('')
-    
+
         return formattedValue
     } else {
         return value
