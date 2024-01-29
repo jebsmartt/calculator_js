@@ -11,15 +11,23 @@ const calcMemoryTemplate = {
     equalsFlag: false,              // used to indicate if equals button was pressed
     memoryLog: function (action) {
         // Get the keys of the object
-        const keys = Object.keys(calcMemory).filter(key => (key !== 'memoryLog'));
+        const keysToExclude = ['equalsFlag', 'memoryLog'];
+
+        const keys = Object.keys(calcMemory).filter(
+        key => !keysToExclude.includes(key)
+        );
 
         // Map each key to a string in the format "key: value"
         const keyValuePairs = keys.map(key => `${key}: ${this[key]}`);
 
         // Join the key-value pairs with commas
-        const resultString = keyValuePairs.join(' | ');
+        const resultString = keyValuePairs.join('\n');
 
-        console.log('Action: ' + String(action) + '\n' + resultString);
+        console.log(
+            'Action: ' + String(action) + '\n' +
+            'Screen: ' + screen.textContent + '\n' +
+            resultString
+        );
     }
 }
 
@@ -38,7 +46,6 @@ let screen = document.getElementById('screen')
 
 // Returns a formatted string that can be shown on screen
 function formatValue(value) {
-    console.log(`Passed to formatValue: ${value}`)
     const formatToggle = true
     
     // Function to see if value to be displayed is in scientific notation
@@ -50,7 +57,6 @@ function formatValue(value) {
             if (value.includes('e')) {
                 newNum = Big(value)
                 value = newNum.toExponential(4)
-                console.log(`newSciNotation: ${value}  type: ${(typeof value)}`)
                 return value
             }
 
@@ -111,6 +117,7 @@ function formatValue(value) {
 function clearCalcMem () {
     calcMemory = { ...calcMemoryTemplate }
     screen.textContent = '0'
+    calcMemory.memoryLog(`Pressed Clear`)
 }
 
 // Let the clear button clear the calcMemory
