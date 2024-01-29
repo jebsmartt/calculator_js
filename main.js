@@ -37,15 +37,40 @@ function getCalcMem (key) {
 let screen = document.getElementById('screen')
 
 function formatValue(value) {
+    console.log(value)
     const formatToggle = true
     
     if (formatToggle) {
+        // format the value to be displayed as the calculated value
+        if (getCalcMem('screenStatus') === 'calculatedValue') {
+            while(digitLimitReached(value)) {
+                // Do things to reduce the length
+                // ..convert the string to an array of characters
+                const characters = value.split('')
+                // ..filter the array down to just digits and decimal
+                const charactersNoCommas = characters.filter(char => /[0-9.]/.test(char))
+                // ..determine where the decimal is if at all
+                let decimalIndex = null
+                if (charactersNoCommas.indexOf('.') > -1) {
+                    decimalIndex = charactersNoCommas.indexOf('.')
+                }
+
+                // if decimal is found, check if there more than two digits after decimal
+                if (decimalIndex && (charactersNoCommas.length - 3) > decimalIndex) {
+                    charactersNoCommas.pop()
+                    // update the value variable so while loop can procees again
+                    value = charactersNoCommas.join('')
+                }
+            }
+
+        }
+        
         // expects a string and all formatting should be string methods
         // Convert the string to an array of characters
         const characters = value.split('')
         // Filter the array down to just digits and decimal
-        const charactersNoCommas = characters.filter(value => /[0-9.]/.test(value))
-        // Determine where to start the for loop to add commas back in
+        const charactersNoCommas = characters.filter(char => /[0-9.]/.test(char))
+        // Determine where to start the for loop
         let startingIndex = charactersNoCommas.length - 3
         if (charactersNoCommas.indexOf('.') > -1) {
             startingIndex = charactersNoCommas.indexOf('.') - 3
@@ -64,45 +89,6 @@ function formatValue(value) {
     } else {
         return value
     }
-    
-
-    // BigCoef = Big();
-    // BigCoef.DP = 6;
-    // if (value.includes('e')) {
-    //     // what to do if in scientific notation
-    //     const parts = value.split('e')
-
-    //     coefficient = BigCoef(parts[0])
-    //     roundedCoefficient = coefficient.div(1)
-        
-    //     parts.splice(0,1,roundedCoefficient.toString())
-    //     const formattedValue = parts.join('e')
-    //     return formattedValue
-
-    // } else {
-    //     // Convert the string to an array of characters
-    //     const characters = value.split('')
-    //     const charactersNoCommas = characters.filter(value => /[0-9.]/.test(value))
-    //     coefficient = BigCoef(charactersNoCommas.join(''))
-    //     console.log(coefficient.toString())
-    //     roundedCoefficient = coefficient.div(1).toString().split('')
-    //     let startingIndex = roundedCoefficient.length - 3
-        
-    //     if (roundedCoefficient.indexOf('.') > -1) {
-    //         startingIndex = roundedCoefficient.indexOf('.') - 3
-    //     } 
-    
-    //     // Iterate over the characters in reverse order
-    //     for (let i = startingIndex; i > 0; i -= 3) {
-    //         // Insert a comma after every group of three digits
-    //         roundedCoefficient.splice(i, 0, ',')
-    //     }
-
-    //     // Join the characters back into a string with commas
-    //     const formattedValue = roundedCoefficient.join('')
-
-    //     return formattedValue
-    // }
 }
 
 function clearCalcMem () {
@@ -133,7 +119,10 @@ keypad.forEach(child => {
         const id = this.id 
         const modifier = this.textContent
 
-        if (getCalcMem('screenStatus') === 'firstValue' && !getCalcMem('pendingOperation')) {
+        if (
+            (getCalcMem('screenStatus') === 'firstValue' && !getCalcMem('pendingOperation')) ||
+            (getCalcMem('screenStatus') === 'secondValue')
+            ) {
             // if they click the decimal button
             if (id == 'decimal') {
                 // if the value show on screen doesn't have a decimal
@@ -145,10 +134,10 @@ keypad.forEach(child => {
                 screen.textContent = modifier
             } else {
                 // Check if the screen value is already at maximum digit length
-                if (digitLimitReached(inputString, modifier)) {
+                if (digitLimitReached(inputString)) {
                     return calcMemory.memoryLog(`Pressed ${modifier}; Max allowable digits reached`)
                 }
-                // if maximum digit length not hit, add digit
+                // if maximum digit length not hit, append a digit
                 let newString = screen.textContent += modifier
                 screen.textContent = formatValue(newString)
             }
@@ -160,25 +149,6 @@ keypad.forEach(child => {
                     screen.textContent = '0.'
             } else {
                 screen.textContent = modifier
-            }
-        } else if (getCalcMem('screenStatus') === 'secondValue') {
-            if (id == 'decimal') {
-                // if the value show on screen doesn't have a decimal
-                if (!screen.textContent.includes('.')) {
-                    // append a decimal to what is shown on screen
-                    screen.textContent += '.'
-                }
-            } else {
-                if (inputString === '0') {
-                    screen.textContent = modifier
-                } else {
-                    if (digitLimitReached(inputString, modifier)) {
-                        return calcMemory.memoryLog(`Pressed ${modifier}; Max allowable digits reached`)
-                    }
-                    
-                    let newString = screen.textContent += modifier
-                    screen.textContent = formatValue(newString)
-                }
             }
         } else if (getCalcMem('screenStatus') === 'calculatedValue') {
             clearCalcMem()
@@ -195,15 +165,15 @@ keypad.forEach(child => {
     
 })
 
-function digitLimitReached(inputString, modifier) {
+function digitLimitReached(inputString) {
     // create an array of digits found
     const digitArray = inputString.match(/\d/g);
 
-    // if max allowable length hit then do nothing and exit function
+    // if max allowable length hit then return true
     if (digitArray.length + 1 >= 16) {
         return true
     }
-
+    // else false
     return false;
 }
 
@@ -214,7 +184,6 @@ const rightControls = document.getElementById('rightControls')
 const notEquals = rightControls.querySelectorAll(':not(#equals)')
 notEquals.forEach(opButton => {
     opButton.addEventListener('click', function () {
-        
         
         // Update values in memory
         switch (calcMemory.screenStatus) {
@@ -278,8 +247,8 @@ equalsButton.addEventListener('click', function () {
             getCalcMem('secondValue')
         ))
         // Updated screen after equals button pressed
-        screen.textContent = formatValue(getCalcMem('calculatedValue').toString())
         updateCalcMem('screenStatus','calculatedValue')
+        screen.textContent = formatValue(getCalcMem('calculatedValue').toString())
     } else if (calcMemory.screenStatus === 'calculatedValue') {
         // Set the fv to cv of the last operation (aka whats on the screen)
         updateCalcMem('firstValue', getCalcMem('calculatedValue'))
@@ -332,4 +301,3 @@ function bigMath(operator, fv, sv) {
 
 // Set default value to zero on screen
 screen.textContent = calcMemory[calcMemory.screenStatus]
-
