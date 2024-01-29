@@ -37,7 +37,7 @@ function getCalcMem (key) {
 let screen = document.getElementById('screen')
 
 function formatValue(value) {
-    const formatToggle = false
+    const formatToggle = true
     
     if (formatToggle) {
         // expects a string and all formatting should be string methods
@@ -144,10 +144,11 @@ keypad.forEach(child => {
             } else if (inputString === '0') {
                 screen.textContent = modifier
             } else {
+                // Check if the screen value is already at maximum digit length
                 if (digitLimitReached(inputString, modifier)) {
                     return calcMemory.memoryLog(`Pressed ${modifier}; Max allowable digits reached`)
                 }
-
+                // if maximum digit length not hit, add digit
                 let newString = screen.textContent += modifier
                 screen.textContent = formatValue(newString)
             }
@@ -276,6 +277,7 @@ equalsButton.addEventListener('click', function () {
             getCalcMem('firstValue'),
             getCalcMem('secondValue')
         ))
+        // Updated screen after equals button pressed
         screen.textContent = formatValue(getCalcMem('calculatedValue').toString())
         updateCalcMem('screenStatus','calculatedValue')
     } else if (calcMemory.screenStatus === 'calculatedValue') {
@@ -286,6 +288,7 @@ equalsButton.addEventListener('click', function () {
             getCalcMem('firstValue'),
             getCalcMem('secondValue')
         ))
+        // Update screen after equals button pressed
         screen.textContent = formatValue(getCalcMem('calculatedValue').toString())
 
     }
