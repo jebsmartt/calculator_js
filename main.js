@@ -36,13 +36,25 @@ function getCalcMem (key) {
 
 let screen = document.getElementById('screen')
 
+// Returns a formatted string that can be shown on screen
 function formatValue(value) {
-    console.log(value)
+    console.log(`Passed to formatValue: ${value}`)
     const formatToggle = true
     
+    // Function to see if value to be displayed is in scientific notation
     if (formatToggle) {
+        
         // format the value to be displayed as the calculated value
         if (getCalcMem('screenStatus') === 'calculatedValue') {
+            // Check to see if value to be displayed is in scientific notation
+            if (value.includes('e')) {
+                newNum = Big(value)
+                value = newNum.toExponential(4)
+                console.log(`newSciNotation: ${value}  type: ${(typeof value)}`)
+                return value
+            }
+
+
             while(digitLimitReached(value)) {
                 // Do things to reduce the length
                 // ..convert the string to an array of characters
@@ -60,12 +72,17 @@ function formatValue(value) {
                     charactersNoCommas.pop()
                     // update the value variable so while loop can procees again
                     value = charactersNoCommas.join('')
+                } else if (!decimalIndex || (charactersNoCommas.length - 3) <= decimalIndex) {
+                    // if there are no decimals return scientific notation
+                    bigNumber = Big(value)
+                    value = bigNumber.toExponential(4)
+                    return value
                 }
             }
 
         }
+
         
-        // expects a string and all formatting should be string methods
         // Convert the string to an array of characters
         const characters = value.split('')
         // Filter the array down to just digits and decimal
