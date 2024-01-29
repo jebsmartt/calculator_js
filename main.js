@@ -42,7 +42,7 @@ function getCalcMem (key) {
     return calcMemory[key]
 }
 
-let screen = document.getElementById('screen')
+let screen = document.getElementById('screenText')
 
 // Returns a formatted string that can be shown on screen
 function formatValue(value) {
@@ -115,7 +115,7 @@ function formatValue(value) {
         if (negativeFlag) {
             charactersNoCommas.splice(0,0,"-")
         }
-        
+
         // Join the characters back into a string with commas
         const formattedValue = charactersNoCommas.join('')
 
@@ -335,4 +335,4 @@ function bigMath(operator, fv, sv) {
 
 
 // Set default value to zero on screen
-screen.textContent = calcMemory[calcMemory.screenStatus]
+screen.textContent = "0"

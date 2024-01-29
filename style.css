@@ -16,7 +16,9 @@ body {
 #calculator {
     background-color: black;
     padding: 20px;
+    margin: 10px;
     border-radius: 10px;
+    min-width: 380px;
 
     flex-basis: 500px;
 
@@ -32,9 +34,18 @@ body {
 
 #screen {
     background-color: rgb(209, 194, 162);
-    text-align: right;
     padding: 7px;
+    
+    display: flex;
+    justify-content: flex-end;
+}
 
+#screenText {
+    text-align: right;
+    padding-left: 7px;
+
+    flex-shrink: 1;
+    overflow: hidden;
 }
 
 #controls {
