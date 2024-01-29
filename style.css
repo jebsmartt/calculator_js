@@ -38,14 +38,17 @@ body {
 }
 
 #controls {
-    
-
     display: flex;
     /* flex LR */
 }
 
+#controls button {
+    min-width: 40px;
+}
+
 #leftControls {
-    
+    min-width: 145px;
+
     flex-grow: 3;
 
     display: flex;
